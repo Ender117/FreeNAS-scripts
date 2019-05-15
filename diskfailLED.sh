@@ -11,25 +11,20 @@ condition=$(/sbin/zpool status $pool | egrep -i '(DEGRADED|FAULTED|OFFLINE|UNAVA
 if [ "${condition}" ]; then
 
 
-echo "$pool" "unhealthy, scanning for failed drive(s)."
+echo >&2 "$pool" "unhealthy, scanning for failed drive(s)."
 
 glabel status | awk '{print "s|"$1"|"$3"\t\t\t	  |g"}' > /tmp/glabel-lookup.sed # prepare translate gptid to geoms
 
-zpool status $pool | grep -vE "(REMOVED|$pool)" | awk -F'was /dev/' '{print $2}' |  sed -f /tmp/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> /tmp/faileddisk.sed
+zpool status "$pool" | awk -F'was /dev/' '{print $2}' |  sed -f /tmp/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> /tmp/faileddisk.sed # look for drives that appended with was /dev/... (uaually offline/removed/unavail state) and write them into /tmp/faileddisk.sed
+zpool status "$pool" | grep -E "(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spares|state|replacing|was /dev/)" |awk -F'(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED)' '{print $1}' | sed -f /tmp/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> /tmp/faileddisk.sed # look for other failed drives and write them into /tmp/faileddisk.sed
 
-zpool status $pool | grep -E "(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spares|state|was /dev/)" |awk -F'(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED)' '{print $1}' |  sed -f /tmp/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> /tmp/faileddisk.sed
-
-
-
-#sesutil locate all off > /dev/null 2>&1
 
 for faileddisk in $(cat /tmp/faileddisk.sed);
 do
-	echo $faileddisk "failed, trying to blink LED."
+	echo >&2 $faileddisk "failed, trying to blink LED."
 	sesutil locate $faileddisk on
 
 done
-
 
 
 else
@@ -50,8 +45,7 @@ do
 
 done
 
+trap 'rm -rf /tmp/glabel-lookup.sed;rm -rf /tmp/faileddisk.sed;rm -rf /tmp/gooddisk.sed;' INT TERM EXIT  
 
 
-rm /tmp/glabel-lookup.sed
-rm /tmp/faileddisk.sed
-rm /tmp/gooddisk.sed
+
