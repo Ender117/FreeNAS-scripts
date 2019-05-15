@@ -54,7 +54,8 @@ zpool status "$pool" | grep -E "(ONLINE)" | grep -vE "($pool|NAME|mirror|raidz|s
 for gooddisk in $(cat "$tmpdir"/gooddisk.sed);
 do
 
-	sesutil locate $gooddisk off 2>/dev/null
+	sesutil locate $gooddisk off > /dev/null 2>&1
+
 
 
 
