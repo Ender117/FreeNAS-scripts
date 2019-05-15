@@ -51,13 +51,11 @@ fi
 
 echo  "Turning off LEDs of good disks."
 zpool status "$pool" | grep -E "(ONLINE)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spares|state|replacing|was /dev/)" |awk -F'(ONLINE)' '{print $1}' | sed -f "$tmpdir"/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> "$tmpdir"/gooddisk.sed # look for good drives and write them into "$tmpdir"/gooddisk.sed
+
 for gooddisk in $(cat "$tmpdir"/gooddisk.sed);
 do
 
 	sesutil locate $gooddisk off > /dev/null 2>&1
-
-
-
 
 done
 
