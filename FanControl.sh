@@ -34,11 +34,11 @@ if [[ $CPUavgT > $NICTupper || $NICT > $NICTupper ]]
     echo "--> enable dynamic fan control"
     ipmitool raw 0x30 0x30 0x01 0x01
   else
-  if [[ $CPUavgT < $NICTlower || $NICT < $NICTlower ]]
-  then
-    echo "--> disable dynamic fan control"
-    ipmitool raw 0x30 0x30 0x01 0x00
-    echo "--> set static fan speed"
-    ipmitool raw 0x30 0x30 0x02 0xff $STATICSPEEDBASE16
+    if [[ $CPUavgT < $NICTlower || $NICT < $NICTlower ]]
+      then
+        echo "--> disable dynamic fan control"
+        ipmitool raw 0x30 0x30 0x01 0x00
+        echo "--> set static fan speed"
+        ipmitool raw 0x30 0x30 0x02 0xff $STATICSPEEDBASE16
     fi
 fi
