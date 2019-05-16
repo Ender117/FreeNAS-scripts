@@ -3,14 +3,14 @@
 DATE=$(date +%Y-%m-%d-%H%M%S)
 
 echo "$DATE"
-#
+
 
 STATICSPEEDBASE16="0x19" #25% RPM
 
 CPUavgTupper="50"
 NICTupper="65"
 nvmeTupper="65"
-CPUavgTlower="45"
+CPUavgTlower="40"
 NICTlower="60"
 nvmeTlower="60"
 
@@ -33,16 +33,22 @@ nvmeT=$(smartctl -a /dev/nvme0 | grep Temperature | sed 's/[^0-9]*//g')
 echo "nvme SSD is" ${nvmeT} "C"
 
 
-if [[ $CPUavgT > $CPUavgTupper ]] || [[ $NICT > $NICTupper ]] || [[ $nvmeT > $nvmeTupper ]]
+if [[ "$CPUavgT" -gt "$CPUavgTupper" ]] || [[ "$NICT" -gt "$NICTupper" ]] || [[ "$nvmeT" -gt "$nvmeTupper" ]]
   then
     echo "--> enable dynamic fan control"
     ipmitool raw 0x30 0x30 0x01 0x01
+#    echo "$DATE" "Dynamic" "$CPUavgT" "$NICT" "$nvmeT"  >> /var/log/fanscript.log
   else
-    if [[ $CPUavgT < $CPUavgTlower ]] && [[ $NICT < $NICTlower ]] && [[ $nvmeT < $nvmeTlower ]]
+    
+    if [[ "$CPUavgT" -lt "$CPUavgTlower" ]] && [[ "$NICT" -lt "$NICTlower" ]] && [[ "$nvmeT" -lt "$nvmeTlower" ]]
       then
         echo "--> disable dynamic fan control"
         ipmitool raw 0x30 0x30 0x01 0x00
         echo "--> set static fan speed"
         ipmitool raw 0x30 0x30 0x02 0xff $STATICSPEEDBASE16
-    fi
+#        echo "$DATE" "Static" "$CPUavgT" "$NICT" "$nvmeT" >> /var/log/fanscript.log
+      else
+#        echo "$DATE" "Stale" "$CPUavgT" "$NICT" "$nvmeT" >> /var/log/fanscript.log
+   fi
+
 fi
