@@ -48,6 +48,7 @@ if [[ "$CPUavgT" -gt "$CPUavgTupper" ]] || [[ "$NICT" -gt "$NICTupper" ]] || [[ 
         ipmitool raw 0x30 0x30 0x02 0xff $STATICSPEEDBASE16
 #        echo "$DATE" "Static" "$CPUavgT" "$NICT" "$nvmeT" >> /var/log/fanscript.log
       else
+         echo "Keeping last fan control state, no changes made."
 #        echo "$DATE" "Stale" "$CPUavgT" "$NICT" "$nvmeT" >> /var/log/fanscript.log
    fi
 
