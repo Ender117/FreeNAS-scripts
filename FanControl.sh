@@ -1,16 +1,18 @@
 #!/bin/bash
 
 DATE=$(date +%Y-%m-%d-%H%M%S)
-echo "" && echo "" && echo "" && echo "" && echo ""
+
 echo "$DATE"
 #
 
-STATICSPEEDBASE16="0x0f"
+STATICSPEEDBASE16="0x19" #25% RPM
 
-CPUavgTupper="45"
+CPUavgTupper="50"
 NICTupper="65"
-CPUavgTlower="40"
+nvmeTupper="65"
+CPUavgTlower="45"
 NICTlower="60"
+nvmeTlower="60"
 
 CPUavgT=0
 ncpu=$( sysctl hw.ncpu | awk '{ print $2 }' )
@@ -27,14 +29,16 @@ echo "CPU temperature (average across all cores) is" ${CPUavgT} "C"
 NICT=$(sysctl dev.t5nex.0.temperature|cut -f2 -d" ")
 echo "NIC temperature is" ${NICT} "C"
 
+nvmeT=$(smartctl -a /dev/nvme0 | grep Temperature | sed 's/[^0-9]*//g')
+echo "nvme SSD is" ${nvmeT} "C"
 
-#
-if [[ $CPUavgT > $NICTupper || $NICT > $NICTupper ]]
+
+if [[ $CPUavgT > $CPUavgTupper ]] || [[ $NICT > $NICTupper ]] || [[ $nvmeT > $nvmeTupper ]]
   then
     echo "--> enable dynamic fan control"
     ipmitool raw 0x30 0x30 0x01 0x01
   else
-    if [[ $CPUavgT < $NICTlower || $NICT < $NICTlower ]]
+    if [[ $CPUavgT < $CPUavgTlower ]] && [[ $NICT < $NICTlower ]] && [[ $nvmeT < $nvmeTlower ]]
       then
         echo "--> disable dynamic fan control"
         ipmitool raw 0x30 0x30 0x01 0x00
