@@ -2,7 +2,7 @@
 
 Scan a pool, blink LEDs to locate bad/missing disks, unblink for good ones. 
 
-First try something like `sesutil locate da1 on` on your system and make sure it's blinking the right LED. Then edit `Backplane=/dev/ses0` to your backplane address and put the script into cron to run every minute or so.
+First try something like `sesutil locate da1 on` on your system and make sure it's blinking the right LED. Then put the script into cron to run every minute or so.
 
 Note that the script would only attempt to turn off LEDs of good drives. So the LED will keep blinking if the bad drive is removed and slot left empty,etc. In this case put the replacement drive into the same slot or use `sesutil locate all off` to turn off all LEDs.
 
