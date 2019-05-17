@@ -1,6 +1,6 @@
 **diskfailLED.sh**
 
-Scan a pool, blink LEDs to locate bad disks, unblink for good ones. 
+Scan a pool, blink LEDs to locate bad/missing disks, unblink for good ones. 
 
 First try something like `sesutil locate da1 on` on your system and make sure it's blinking the right LED. Then edit `Backplane=/dev/ses0` to your backplane address and put the script into cron to run every minute or so.
 
