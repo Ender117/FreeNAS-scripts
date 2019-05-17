@@ -57,7 +57,7 @@ else
 echo "Pool" "$pool" "is healthy."
 
 
-#prepare SESidlookup.old.$pool.sed and glabel-lookup.old.$pool.sed to use with potential missing disks
+#prepare SESidlookup.old.$pool.sed and glabel-lookup.old.$pool.sed to use in the future
 glabel status | awk '{print "s|"$1"|"$3"\t\t\t	  |g"}' > /tmp/glabel-lookup.old.$pool.sed # prepare translate gptid to geoms
 
 truncate -s 0 /tmp/SESidlookup.old.$pool.sed
