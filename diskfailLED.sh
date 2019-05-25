@@ -13,7 +13,12 @@ pool="$1"
 
 
 tmpdir=/tmp/diskfailLED."$pool"
-mkdir "$tmpdir"
+if mkdir "$tmpdir" ;then
+  echo "Checking pool" $pool "status"
+else
+  echo "Another instance is already running on the pool, exiting."
+  exit
+fi
 
 trap 'rm -rf "$tmpdir"' INT TERM EXIT
 
