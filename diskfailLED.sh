@@ -35,7 +35,7 @@ echo >&2 "Pool" "$pool" "unhealthy, scanning for failed drive(s)."
 
 
 
-zpool status "$pool" | grep -E "(DEGRADED|FAULTED|OFFLINE|UNAVAIL|FAIL|DESTROYED|REMOVED)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spares|state|replacing)" | awk -F'was /dev/' '{print $2}' |  sed -f /tmp/glabel-lookup.old.$pool.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> "$tmpdir"/missingdisk # look for drives that appended with was /dev/... (uaually offline/removed/unavail state) and write them into "$tmpdir"/missingdisk
+zpool status "$pool" | grep -E "(DEGRADED|FAULTED|OFFLINE|UNAVAIL|FAIL|DESTROYED|REMOVED)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spare|state|replacing)" | awk -F'was /dev/' '{print $2}' |  sed -f /tmp/glabel-lookup.old.$pool.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> "$tmpdir"/missingdisk # look for drives that appended with was /dev/... (uaually offline/removed/unavail state) and write them into "$tmpdir"/missingdisk
 
 for missingdisk in $(cat "$tmpdir"/missingdisk);
 do
@@ -46,7 +46,7 @@ do
 done
 
 
-zpool status "$pool" | grep -E "(DEGRADED|FAULTED|OFFLINE|UNAVAIL|FAIL|DESTROYED|REMOVED)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spares|state|replacing|was /dev/)" |awk -F'(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED)' '{print $1}' | sed -f "$tmpdir"/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> "$tmpdir"/faileddisk # look for other failed drives and write them into "$tmpdir"/faileddisk
+zpool status "$pool" | grep -E "(DEGRADED|FAULTED|OFFLINE|UNAVAIL|FAIL|DESTROYED|REMOVED)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spare|state|replacing|was /dev/)" |awk -F'(DEGRADED|FAULTED|OFFLINE|UNAVAIL|REMOVED|FAIL|DESTROYED)' '{print $1}' | sed -f "$tmpdir"/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> "$tmpdir"/faileddisk # look for other failed drives and write them into "$tmpdir"/faileddisk
 
 
 for faileddisk in $(cat "$tmpdir"/faileddisk);
@@ -71,7 +71,7 @@ for backplane in /dev/ses?;
 
   for das in /dev/da? /dev/da??;
     do
-    sesutil map -u $backplane | grep -w -B2 "${das//"/dev/"}" | xargs | sed 's/,.*,/ /g' | tr -d Element | sed 's/\(.* \)\(.*\)/\2\1/g' |sed "s; ; $backplane ;"| awk '{print "s|\\<"$1 "\\>|" $2 " " $3"\t\t\t  |g"}'>> /tmp/SESidlookup.old.$pool.sed
+    sesutil map -u $backplane | grep -w -B2 "${das//"/dev/"}" |  xargs | sed 's/,.*:/ /g' | sed 's/,.*//'| tr -d Element | sed 's/\(.* \)\(.*\)/\2\1/g' |sed "s; ; $backplane ;"| awk '{print "s|\\<"$1 "\\>|" $2 " " $3"\t\t\t  |g"}'>> /tmp/SESidlookup.old.$pool.sed
 
   done
 
@@ -85,7 +85,7 @@ fi
 
 echo  "Turning off LEDs of good disks."
 
-zpool status "$pool" | grep -E "(ONLINE)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spares|state|replacing|was /dev/)" |awk -F'(ONLINE)' '{print $1}' | sed -f "$tmpdir"/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> "$tmpdir"/gooddisk # look for good drives and write them into "$tmpdir"/gooddisk
+zpool status "$pool" | grep -E "(ONLINE)" | grep -vE "($pool|NAME|mirror|raidz|stripe|logs|spare|state|replacing|was /dev/)" |awk -F'(ONLINE)' '{print $1}' | sed -f "$tmpdir"/glabel-lookup.sed | awk -F'p[0-9]' '{print $1}' | awk 'NF' >> "$tmpdir"/gooddisk # look for good drives and write them into "$tmpdir"/gooddisk
 
 for gooddisk in $(cat "$tmpdir"/gooddisk);
 do
