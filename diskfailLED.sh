@@ -71,7 +71,7 @@ for backplane in /dev/ses?;
 
   for das in /dev/da? /dev/da??;
     do
-    sesutil map -u $backplane | grep -w -B2 "${das//"/dev/"}" |  xargs | sed 's/,.*:/ /g' | sed 's/,.*//'| tr -d Element | sed 's/\(.* \)\(.*\)/\2\1/g' |sed "s; ; $backplane ;"| awk '{print "s|\\<"$1 "\\>|" $2 " " $3"\t\t\t  |g"}'>> /tmp/SESidlookup.old.$pool.sed
+    sesutil map -u $backplane | grep -w -B2 "${das//"/dev/"}" | xargs | sed 's/,.*//' | tr -d Element | sed "s|^|${das//"/dev/"}|" |sed "s; ; $backplane ;"| awk '{print "s|\\<"$1 "\\>|" $2 " " $3"\t\t\t  |g"}'>> /tmp/SESidlookup.old.$pool.sed
 
   done
 
